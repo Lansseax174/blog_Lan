@@ -1,61 +1,195 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <title>兰斯构域</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: radial-gradient(circle, #0f0f2f, #000000);
-            color: #00ffe7;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .container {
-            text-align: center;
-            padding: 40px;
-            max-width: 800px;
-        }
-        .glow {
-            font-size: 3em;
-            text-shadow: 0 0 10px #00ffe7, 0 0 20px #00ffe7;
-            margin-bottom: 30px;
-        }
-        .article {
-            background: #111122;
-            border-left: 5px solid #00ffe7;
-            margin: 20px 0;
-            padding: 20px;
-            text-align: left;
-            box-shadow: 0 0 10px #00ffe7;
-        }
-        .article h2 {
-            margin-top: 0;
-        }
-    </style>
+<meta charset="UTF-8" />
+<title>兰斯构域</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: radial-gradient(circle, #0f0f2f, #000000);
+        color: #00ffe7;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .menu-bar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .menu-item, .menu-title {
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        padding: 0 28px;
+        background: #111122;
+        color: #00ffe7;
+        box-shadow: 0 0 10px #00ffe7;
+        transition: background 0.3s, transform 0.3s;
+        white-space: nowrap;
+        font-weight: bold;
+        user-select: none;
+    }
+
+    /* 最左按钮：左直角，右凹三角 */
+.left-button.first {
+    width: 100px;
+    clip-path: polygon(
+        0 0, 70% 0, 100% 50%, 70% 100%, 0 100%,0 100%
+    );
+    z-index: 15;
+    margin-right: -38px; /* 右侧紧贴 */
+}
+
+/* 左侧中间按钮：左凸三角，右凹三角 */
+.left-button.middle {
+    width: 100px;
+    clip-path: polygon(
+        30% 50%, 0% 0, 70% 0, 100% 50%, 70% 100%, 0% 100%
+    );
+    margin-left: -4px; /* 左侧紧贴 */
+    margin-right: -38px; /* 右侧紧贴 */
+    z-index: 15;
+}
+
+/* 右侧中间按钮：左凹三角，右凸三角 */
+.right-button.middle {
+    width: 100px;
+    clip-path: polygon(
+        30% 0, 0% 50%, 30% 100%, 100% 100%, 70% 50%, 100% 0
+    );
+    margin-left: -38px; /* 紧贴前一个按钮 */
+    margin-right: -5px;
+    z-index: 15;
+}
+
+/* 最右按钮：左凹三角，右直角 */
+.right-button.last {
+    width: 100px;
+    clip-path: polygon(
+        30% 0, 0% 50%, 30% 100%, 100% 100%, 100% 0
+    );
+    margin-left: -38px;
+    margin-right: 0px;
+    z-index: 15;
+}
+@keyframes glow-breath {
+  0%, 100% {
+    text-shadow:
+      0 0 6px rgba(255, 255, 255, 0.0),
+      0 0 12px rgba(255, 255, 255, 0.4),
+      0 0 18px rgba(0, 255, 231, 0.3),
+      0 0 24px rgba(0, 255, 231, 0.1);
+  }
+  50% {
+    text-shadow:
+      0 0 10px rgba(255, 255, 255, 0.9),
+      0 0 20px rgba(255, 255, 255, 0.8),
+      0 0 30px rgba(0, 255, 231, 0.7),
+      0 0 40px rgba(0, 255, 231, 0.5);
+  }
+}
+/* 中间六边形标题 */
+.menu-title {
+    width: 400px;
+    clip-path: polygon(
+        0% 0%, 100% 0%, 90% 50%, 100% 100%, 0% 100%, 10% 50%
+    );
+    font-size: 3.5em;
+    position: relative;
+    z-index: 20;
+    margin: 0 -4px;
+
+    animation: glow-breath 2.5s ease-in-out infinite;
+}
+
+
+    .menu-item:hover, .menu-title:hover {
+        background: #00ffe7;
+        color: #000;
+        transform: scale(1.03);
+    }
+
+    .container {
+        margin-top: 100px;
+        text-align: center;
+        padding: 40px;
+        max-width: 800px;
+    }
+
+    .glow {
+        font-size: 3em;
+        text-shadow: 0 0 10px #00ffe7, 0 0 20px #00ffe7;
+        margin-bottom: 30px;
+    }
+
+    .article {
+        background: #111122;
+        border-left: 5px solid #00ffe7;
+        margin: 20px 0;
+        padding: 20px;
+        text-align: left;
+        box-shadow: 0 0 10px #00ffe7;
+    }
+
+    .article h2 {
+        margin-top: 0;
+    }
+
+    a.button-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        background: #00ffe7;
+        color: #000;
+        font-weight: bold;
+        border-radius: 6px;
+        text-decoration: none;
+    }
+
+    a.button-link:hover {
+        background: #00cccc;
+    }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="glow">Man!</h1>
 
-            <a href="/model" style="display:inline-block; margin-bottom:20px; padding:10px 20px; background:#00ffe7; color:#000; font-weight:bold; border-radius:6px; text-decoration:none;">
-      进入3D模型页面
-    </a>
+<!-- 菜单栏 -->
+<div class="menu-bar">
+    <div class="menu-item left-button first">首页</div>
+    <div class="menu-item left-button middle">模型</div>
+    <div class="menu-item left-button middle">关于</div>
+    <div class="menu-title">兰斯构域</div>
+    <div class="menu-item right-button middle">博客</div>
+    <div class="menu-item right-button middle">联系</div>
+    <div class="menu-item right-button last">设置</div>
+</div>
 
-        <p>What can I say</p>
+<!-- 主体内容 -->
+<div class="container">
+    <h1 class="glow">Man!</h1>
 
-        {% for article in articles %}
-            <div class="article">
-                <h2>{{ article.title }}</h2>
-                <div>{{ article.content|safe }}</div>
-            </div>
-        {% endfor %}
+    <a href="/model" class="button-link">进入3D模型页面</a>
+
+    <p>What can I say</p>
+
+    {% for article in articles %}
+    <div class="article">
+        <h2>{{ article.title }}</h2>
+        <div>{{ article.content|safe }}</div>
     </div>
+    {% endfor %}
+</div>
+
 </body>
 </html>
