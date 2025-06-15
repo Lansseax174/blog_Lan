@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>编辑文章 - {{ filename }}</title>
+<!-- 引入 EasyMDE CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+</head>
+<body>
+
+<h2>编辑文章 - {{ filename }}</h2>
+<form method="post">
+    <label>文件名（包含.md后缀）：</label><br>
+    <input type="text" name="filename" value="{{ filename }}" required><br><br>
+
+    <textarea name="content" id="md-editor" rows="20">{{ content }}</textarea><br>
+    <button type="submit">保存</button>
+    <a href="{{ url_for('admin') }}">返回管理页</a>
+</form>
+
+<script>
+    var easyMDE = new EasyMDE({ element: document.getElementById('md-editor') });
+</script>
+
+</body>
+</html>
