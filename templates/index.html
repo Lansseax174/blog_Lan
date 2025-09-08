@@ -39,6 +39,8 @@
         white-space: nowrap;
         font-weight: bold;
         user-select: none;
+        text-decoration: none;  /* 去掉下划线 */
+        cursor: pointer;        /* 鼠标移上去显示手型 */
     }
 
     /* 最左按钮：左直角，右凹三角 */
@@ -252,13 +254,13 @@
 
 <!-- 菜单栏 -->
 <div class="menu-bar animate-on-load">
-    <div class="menu-item left-button first slide-left">首页</div>
-    <div class="menu-item left-button middle slide-left">模型</div>
-    <div class="menu-item left-button middle slide-left">关于</div>
-    <div class="menu-title title-animate">碳硅矩阵</div>
-    <div class="menu-item right-button middle slide-right">博客</div>
-    <div class="menu-item right-button middle slide-right">联系</div>
-    <div class="menu-item right-button last slide-right">设置</div>
+    <a href="/" class="menu-item left-button first slide-left">首页</a>
+    <a href="/about" class="menu-item left-button middle slide-left">博客</a>
+    <a href="/about" class="menu-item left-button middle slide-left">关于</a>
+    <a href="/about" class="menu-title title-animate">碳硅矩阵</a>
+    <a href="/about" class="menu-item right-button middle slide-right">联系</a>
+    <a href="/login" class="menu-item right-button middle slide-right">编辑</a>
+    <a href="/about" class="menu-item right-button last slide-right">设置</a>
 </div>
 
 
@@ -358,7 +360,7 @@ animateStars();
                 color: #666;
                 font-size: 10px;
                 line-height: 1;">
-    <p>Carbon-Silicon Matrix &copy; 2025. All Rights Reserved.</p>
+    <p>Carbon-Silicon Matrix (兰斯构域) &copy; 2025. All Rights Reserved.</p>
     <p><a href="https://beian.miit.gov.cn/" target="_blank" style="color:#666; text-decoration:none;">
         粤ICP备12345678号-2
         github-public版本

@@ -1,18 +1,162 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head><meta charset="UTF-8"><title>后台管理</title></head>
-<body>
-<h2>文章管理</h2>
-<p><a href="{{ url_for('edit') }}">新建文章</a> | <a href="{{ url_for('logout') }}">退出登录</a></p>
+<head>
+<meta charset="UTF-8" />
+<title>后台管理</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: radial-gradient(circle, #0f0f2f, #000000);
+        color: #00ffe7;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
 
-<ul>
-{% for f in files %}
-    <li>{{ f }}
-        [<a href="{{ url_for('edit', filename=f) }}">编辑</a>]
-        [<a href="{{ url_for('delete', filename=f) }}" onclick="return confirm('确定删除？');">删除</a>]
-    </li>
-{% endfor %}
-</ul>
+    .container {
+        margin-top: 100px;
+        text-align: center;
+        padding: 40px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        background: rgba(20, 20, 40, 0.7);
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 255, 231, 0.4);
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #00ffe7;
+    }
+
+    a {
+        color: #00ffe7;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+    }
+
+    li {
+        margin: 10px 0;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.4);
+        border-left: 4px solid #00ffe7;
+        border-radius: 6px;
+    }
+
+    #starfield {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: -1;
+        background: radial-gradient(circle, #0f0f2f, #000000);
+    }
+
+    .button-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #00ffe7;
+    color: #000;
+    border-radius: 6px;
+    text-decoration: none;
+    }
+    .button-link:hover {
+        background: #00cccc;
+    }
+
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<div class="container">
+    <a href="/" class="button-link">返回</a>
+    <h2>文章管理</h2>
+    <p>
+        <a href="{{ url_for('edit') }}">新建文章</a> |
+        <a href="{{ url_for('logout') }}">退出登录</a>
+    </p>
+
+    <ul>
+    {% for f in files %}
+        <li>{{ f }}
+            [<a href="{{ url_for('edit', filename=f) }}">编辑</a>]
+            [<a href="{{ url_for('delete', filename=f) }}" onclick="return confirm('确定删除？');">删除</a>]
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+
+<script>
+// 星空背景逻辑
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const numStars = 500;
+const stars = [];
+const maxZ = canvas.width;
+const speed = 0.5;
+
+for (let i = 0; i < numStars; i++) {
+    stars.push({
+        x: Math.random() * canvas.width - canvas.width / 2,
+        y: Math.random() * canvas.height - canvas.height / 2,
+        z: Math.random() * maxZ,
+        size: Math.random() * 2 + 1
+    });
+}
+
+function updateStars() {
+    for (let star of stars) {
+        star.z -= speed;
+        if (star.z <= 0) {
+            star.x = Math.random() * canvas.width - canvas.width / 2;
+            star.y = Math.random() * canvas.height - canvas.height / 2;
+            star.z = maxZ;
+            star.size = Math.random() * 2 + 1;
+        }
+    }
+}
+
+function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let star of stars) {
+        const sx = (star.x / star.z) * canvas.width + canvas.width / 2;
+        const sy = (star.y / star.z) * canvas.height + canvas.height / 2;
+        const radius = (1 - star.z / maxZ) * star.size * 2;
+        ctx.beginPath();
+        ctx.arc(sx, sy, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(0,255,255,${1 - star.z / maxZ})`;
+        ctx.fill();
+    }
+}
+
+function animateStars() {
+    updateStars();
+    drawStars();
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+
 
 </body>
 </html>

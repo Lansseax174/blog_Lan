@@ -6,22 +6,163 @@
 <!-- 引入 EasyMDE CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: radial-gradient(circle, #0f0f2f, #000000);
+        color: #00ffe7;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .container {
+        margin-top: 100px;
+        text-align: center;
+        padding: 40px;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+        background: rgba(160, 160, 320, 0.6);
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 255, 231, 0.4);
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #00ffe7;
+    }
+
+    label {
+        color: #00ffe7;
+        font-weight: bold;
+    }
+
+    input[type="text"], textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #00ffe7;
+        background: rgba(0, 0, 0, 0.5);
+        color: #00ffe7;
+        font-family: monospace;
+    }
+
+    button, a {
+        margin-top: 15px;
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button {
+        background: #00ffe7;
+        color: #000;
+    }
+
+    button:hover {
+        background: #00cccc;
+    }
+
+    a {
+        color: #00ffe7;
+        text-decoration: none;
+        margin-left: 15px;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    #starfield {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: -1;
+        background: radial-gradient(circle, #0f0f2f, #000000);
+    }
+
+</style>
 </head>
 <body>
+<canvas id="starfield"></canvas>
 
-<h2>编辑文章 - {{ filename }}</h2>
-<form method="post">
-    <label>文件名（包含.md后缀）：</label><br>
-    <input type="text" name="filename" value="{{ filename }}" required><br><br>
+<div class="container">
+    <h2>编辑文章 - {{ filename }}</h2>
+    <form method="post">
+        <label>文件名（包含.md后缀）：</label><br>
+        <input type="text" name="filename" value="{{ filename }}" required><br><br>
 
-    <textarea name="content" id="md-editor" rows="20">{{ content }}</textarea><br>
-    <button type="submit">保存</button>
-    <a href="{{ url_for('admin') }}">返回管理页</a>
-</form>
+        <textarea name="content" id="md-editor" rows="20">{{ content }}</textarea><br>
+        <button type="submit">保存</button>
+        <a href="{{ url_for('admin') }}">返回管理页</a>
+    </form>
+</div>
 
 <script>
     var easyMDE = new EasyMDE({ element: document.getElementById('md-editor') });
+
+    // 星空背景逻辑
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const numStars = 500;
+    const stars = [];
+    const maxZ = canvas.width;
+    const speed = 0.5;
+
+    for (let i = 0; i < numStars; i++) {
+        stars.push({
+            x: Math.random() * canvas.width - canvas.width / 2,
+            y: Math.random() * canvas.height - canvas.height / 2,
+            z: Math.random() * maxZ,
+            size: Math.random() * 2 + 1
+        });
+    }
+
+    function updateStars() {
+        for (let star of stars) {
+            star.z -= speed;
+            if (star.z <= 0) {
+                star.x = Math.random() * canvas.width - canvas.width / 2;
+                star.y = Math.random() * canvas.height - canvas.height / 2;
+                star.z = maxZ;
+                star.size = Math.random() * 2 + 1;
+            }
+        }
+    }
+
+    function drawStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let star of stars) {
+            const sx = (star.x / star.z) * canvas.width + canvas.width / 2;
+            const sy = (star.y / star.z) * canvas.height + canvas.height / 2;
+            const radius = (1 - star.z / maxZ) * star.size * 2;
+            ctx.beginPath();
+            ctx.arc(sx, sy, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = `rgba(0,255,255,${1 - star.z / maxZ})`;
+            ctx.fill();
+        }
+    }
+
+    function animateStars() {
+        updateStars();
+        drawStars();
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
 </script>
+
 
 </body>
 </html>
