@@ -97,6 +97,38 @@
         </li>
     {% endfor %}
     </ul>
+
+    <ul id="file-list">
+  {% for f in files %}
+  <li data-name="{{ f }}">{{ f }}</li>
+  {% endfor %}
+</ul>
+
+<button id="save-order">保存顺序</button>
+
+<!-- 引入 SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+  // 让 <ul> 可拖动排序
+  const sortable = new Sortable(document.getElementById('file-list'), {
+      animation: 150
+  });
+
+  document.getElementById('save-order').addEventListener('click', () => {
+      // 获取当前顺序
+      const order = [...document.querySelectorAll('#file-list li')]
+                    .map(li => li.dataset.name);
+      // 发送到后端
+      fetch('{{ url_for("save_order") }}', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({order})
+      }).then(r => {
+          if (r.ok) alert('顺序已保存');
+      });
+  });
+</script>
+
 </div>
 
 <script>

@@ -122,16 +122,16 @@
     }
 
     .container {
-        margin-top: 100px;
+        margin-top: 50px;
         text-align: center;
         padding: 40px;
         max-width: 800px;
     }
 
     .glow {
-        font-size: 3em;
-        text-shadow: 0 0 10px #00ffe7, 0 0 20px #00ffe7;
-        margin-bottom: 30px;
+        font-size: 35px;
+        text-shadow: 0 0 10px #00ffe7, 0 0 14px #00ffe7;
+        margin-bottom: 50px;
     }
 
     .article {
@@ -240,19 +240,135 @@
     background: radial-gradient(circle, #0f0f2f, #000000); /* 保留原背景渐变 */
 }
 
+    /* 头像容器，固定在页面顶部中央 */
+.avatar-container {
+    position: absolute;
+    top: 80px;             /* 距离顶部，可根据需要调整 */
+    left: 50%;             /* 水平居中 */
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 120px;          /* 头像大小 */
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 20px #00ffe7;
+}
+
+/* 头像本身：无限旋转动画 */
+.avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: spin 50s linear infinite;
+    border-radius: 50%;
+}
+
+.avatar-container:hover .avatar {
+    animation-play-state: paused;
+}
+
+/* 关键帧：360°旋转 */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* 星空依然全屏 */
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* 整体遮罩：开始时整屏 */
+.reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999999;
+  pointer-events: none;
+}
+
+/* 幕布一整块 */
+.reveal .curtain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;        /* ⬅️ 初始占满 */
+  height: 100%;
+  background: radial-gradient(circle,#0f0f2f,#000);
+  will-change: clip-path;
+  /* 初始 clip-path：整个矩形都显示 */
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 2s cubic-bezier(.22,.8,.16,1);
+}
+
+/* 激活时从两侧向中间收缩 */
+.reveal.active .curtain {
+  /* 左右各收缩到 50% */
+  clip-path: inset(0 50% 0 50%);
+}
+
+/* 左右光线：起始在屏幕最外侧 */
+.beam {
+  position: absolute;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(to right,
+              rgba(0,255,231,0), rgba(0,255,231,0.9), rgba(0,255,231,0));
+  filter: blur(1px);
+  box-shadow: 0 0 24px rgba(0,255,231,0.8), 0 0 60px rgba(0,255,231,0.4);
+  mix-blend-mode: screen;
+  transition:
+      transform 2s cubic-bezier(.22,.8,.16,1),
+      opacity   2s ease-in;   /* ⬅️ 增加透明度过渡 */
+  opacity: 1;                  /* 初始最亮 */
+}
+
+.reveal.active .beam {
+  opacity: 0;                  /* ⬅️ 动画过程中逐渐消失 */
+}
+
+
+.beam-left  { left: 0;  transform: translateX(0); }
+.beam-right { right: 0; transform: translateX(0); }
+
+/* 激活：光线向中线移动 */
+.reveal.active .beam-left  { transform: translateX(50vw); }
+.reveal.active .beam-right { transform: translateX(-50vw); }
+
+
+
+
 
 </style>
 </head>
-<canvas id="starfield"></canvas>
 <body>
 
+  <!-- 遮罩层：从两侧向中间合拢 -->
+<div class="reveal">
+  <div class="beam beam-left"></div>
+  <div class="beam beam-right"></div>
+  <div class="curtain"></div>
+</div>
+
+<div class="stage">
+    <canvas id="starfield"></canvas>
     <header>
         <div class="logo-container">
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="My Logo" class="logo">
         </div>
     </header>
 
-<!-- 菜单栏 -->
+    <!-- 旋转头像 -->
+<div class="avatar-container">
+    <img src="{{ url_for('static', filename='images/avatar.jpg') }}" alt="Avatar" class="avatar">
+</div>
+
+    <!-- 菜单栏 -->
 <div class="menu-bar animate-on-load">
     <a href="/" class="menu-item left-button first slide-left">首页</a>
     <a href="/about" class="menu-item left-button middle slide-left">博客</a>
@@ -266,11 +382,12 @@
 
 <!-- 主体内容 -->
 <div class="container">
-    <h1 class="glow">Man!</h1>
+    <h1 class="glow"></h1>
+    <p>Lansseax</p>
 
-    <a href="/model" class="button-link">进入3D模型页面</a>
+    <a href="https://github.com/Lansseax174" class="button-link">Github: https://github.com/Lansseax174</a>
 
-    <p>What can I say</p>
+
 
     {% for article in articles %}
     <div class="article">
@@ -355,7 +472,7 @@ animateStars();
 
 <!-- 页脚 -->
 <footer style="text-align:center;
-                position: fixed;
+                position: relative;
                 bottom: 15px;
                 color: #666;
                 font-size: 10px;
@@ -366,6 +483,16 @@ animateStars();
         github-public版本
     </a></p>
 </footer>
+</div>
+
+<script>
+window.addEventListener('load', () => {
+  const reveal = document.querySelector('.reveal');
+  requestAnimationFrame(() => reveal.classList.add('active'));
+  reveal.addEventListener('transitionend', () => reveal.remove(), { once:true });
+});
+
+</script>
 
 </body>
 </html>

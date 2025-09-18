@@ -44,7 +44,7 @@
     }
 
     .login-box input[type="password"] {
-        width: 100%;
+        width: 90%;
         padding: 10px;
         margin: 15px 0;
         border: none;
@@ -75,6 +75,13 @@
         color: #ff4444;
         margin-top: 10px;
     }
+
+    .login-box form button {
+        display: block;     /* 每个按钮独占一行 */
+        margin-top: 10px;   /* 每个按钮上方留空 */
+    }
+
+
 </style>
 </head>
 <body>
@@ -85,6 +92,7 @@
     <form method="post">
         <input type="password" name="password" placeholder="输入密码" required>
         <button type="submit">登录</button>
+        <button type="button" onclick="window.location.href='{{ url_for('index') }}'">返回</button>
     </form>
     {% if error %}
     <p class="error">{{ error }}</p>
