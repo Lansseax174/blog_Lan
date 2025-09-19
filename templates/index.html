@@ -242,16 +242,17 @@
 
     /* 头像容器，固定在页面顶部中央 */
 .avatar-container {
-    position: absolute;
+    position: relative;
     top: 80px;             /* 距离顶部，可根据需要调整 */
     left: 50%;             /* 水平居中 */
     transform: translateX(-50%);
-    z-index: 9999;
+    z-index: 99;
     width: 120px;          /* 头像大小 */
     height: 120px;
     border-radius: 50%;
     overflow: hidden;
     box-shadow: 0 0 20px #00ffe7;
+    margin-bottom: 5px;
 }
 
 /* 头像本身：无限旋转动画 */
@@ -371,12 +372,12 @@
     <!-- 菜单栏 -->
 <div class="menu-bar animate-on-load">
     <a href="/" class="menu-item left-button first slide-left">首页</a>
-    <a href="/about" class="menu-item left-button middle slide-left">博客</a>
+    <a href="/blog" class="menu-item left-button middle slide-left">博客</a>
     <a href="/about" class="menu-item left-button middle slide-left">关于</a>
-    <a href="/about" class="menu-title title-animate">碳硅矩阵</a>
-    <a href="/about" class="menu-item right-button middle slide-right">联系</a>
-    <a href="/login" class="menu-item right-button middle slide-right">编辑</a>
-    <a href="/about" class="menu-item right-button last slide-right">设置</a>
+    <a href="/Carbon_Silicon_Matrix" class="menu-title title-animate">碳硅矩阵</a>
+    <a href="/contact" class="menu-item right-button middle slide-right">联系</a>
+    <a href="/admin" class="menu-item right-button middle slide-right">编辑</a>
+    <a href="/settings" class="menu-item right-button last slide-right">设置</a>
 </div>
 
 

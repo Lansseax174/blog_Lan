@@ -2,6 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, a
 import markdown
 import os
 import json
+
+from dotenv import load_dotenv
+load_dotenv()
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # 这里填一个复杂点的随机字符串，保证 session 安全
 
@@ -10,9 +15,6 @@ CONTENT_DIR = './content'
 
 # 文章排序顺序文件
 ORDER_FILE = 'order.json'
-
-# 预设后台登录密码
-ADMIN_PASSWORD = '123456'
 
 # 前台主页
 @app.route('/')
@@ -146,6 +148,26 @@ def delete(filename):
     if os.path.exists(filepath):
         os.remove(filepath)
     return redirect(url_for('admin'))
+
+@app.route('/blog')
+def blog():
+    return render_template('blog.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+@app.route('/Carbon_Silicon_Matrix')
+def carbon_silicon_matrix():
+    return render_template('Carbon_Silicon_Matrix.html')
 
 if __name__ == '__main__':
     if not os.path.exists(CONTENT_DIR):
