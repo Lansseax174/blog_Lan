@@ -10,25 +10,26 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # 这里填一个复杂点的随机字符串，保证 session 安全
 
-# 博客文章存放目录
-CONTENT_DIR = './content'
+# 主页文章存放目录
+Content_dir = './content'
+BlogContent_dir = './BlogContent'
 
 # 文章排序顺序文件
-ORDER_FILE = 'order.json'
-
+Content_Order = 'ContentOrder.json'
+BlogContent_Order = 'BlogContentOrder.json'
 # 前台主页
 @app.route('/')
 def index():
     # 读取自定义顺序
     custom_order = []
-    if os.path.exists(ORDER_FILE):
-        with open(ORDER_FILE, 'r', encoding='utf-8') as f:
+    if os.path.exists(Content_dir):
+        with open(Content_Order, 'r', encoding='utf-8') as f:
             custom_order = json.load(f)
 
     articles = [] # 存储读到的文章数据
-    for filename in os.listdir(CONTENT_DIR):
+    for filename in os.listdir(Content_dir):
         if filename.endswith('.md'):
-            filepath = os.path.join(CONTENT_DIR, filename)
+            filepath = os.path.join(Content_dir, filename)
             with open(filepath, 'r', encoding='utf-8') as file:
                 md_text = file.read()
             file_html_version = markdown.markdown(md_text, extensions=['fenced_code'])
@@ -73,12 +74,12 @@ def admin():
         return redirect(url_for('login'))
     # 列出所有 Markdown 文件，方便选择编辑
 
-    files = [f for f in os.listdir(CONTENT_DIR) if f.endswith('.md')]
+    files = [f for f in os.listdir(Content_dir) if f.endswith('.md')]
 
     custom_order = []
-    if os.path.exists(ORDER_FILE):
+    if os.path.exists(Content_Order):
         try:
-            with open(ORDER_FILE, 'r', encoding='utf-8') as file:
+            with open(Content_Order, 'r', encoding='utf-8') as file:
                 custom_order = json.load(file)
         except Exception:
             custom_order = []
@@ -91,7 +92,31 @@ def admin():
         # 没有自定义顺序就按名称排
         files.sort(key=str.lower)
 
-    return render_template('admin.html', files=files, has_custom_order=bool(custom_order))
+    files_blog = [f for f in os.listdir(BlogContent_dir) if f.endswith('.md')]
+
+    custom_order_blog = []
+    if os.path.exists(BlogContent_Order):
+        try:
+            with open(BlogContent_Order, 'r', encoding='utf-8') as file:
+                custom_order_blog = json.load(file)
+        except Exception:
+            custom_order_blog = []
+
+    if custom_order_blog:
+        # 按 BlogContentOrder.json 里的顺序排；不在 order.json 里的放到后面并按名称排序
+        idx = {name: i for i, name in enumerate(custom_order_blog)}
+        files_blog.sort(key=lambda name: (0, idx[name]) if name in idx else (1, name.lower()))
+    else:
+        # 没有自定义顺序就按名称排
+        files_blog.sort(key=str.lower)
+
+
+    return render_template(
+        'admin.html',
+                           files=files,
+                           files_blog=files_blog,
+                            has_custom_order=bool(custom_order),
+                            has_custom_order_blog = bool(custom_order_blog))
 
 
 @app.route('/save_order', methods=['POST'])
@@ -99,26 +124,37 @@ def save_order():
     if not session.get('logged_in'):
         return '', 403
     data = request.get_json()
-    with open(ORDER_FILE, 'w', encoding='utf-8') as f:
+    with open(Content_Order, 'w', encoding='utf-8') as f:
         json.dump(data['order'], f, ensure_ascii=False, indent=2)
     return '', 200
 
-# 编辑或新建文章
-@app.route('/edit', methods=['GET', 'POST'])
-def edit():
+@app.route('/save_order2', methods=['POST'])
+def save_order2():
+    if not session.get('logged_in'):
+        return '', 403
+    data = request.get_json()
+    with open(BlogContent_Order, 'w', encoding='utf-8') as f:
+        json.dump(data['order'], f, ensure_ascii=False, indent=2)
+    return '', 200
+
+# 编辑或新建主页文章
+@app.route('/<scope>/edit', methods=['GET', 'POST'])
+def edit(scope):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
 
     filename = request.args.get('filename') or 'new_post.md'
 
-    filepath = os.path.join(CONTENT_DIR, filename)
+    # scope = "main" 或 "blog"
+    base_dir = Content_dir if scope == 'main' else BlogContent_dir
+    filepath = os.path.join(base_dir, filename)
 
     if request.method == 'POST':
         content = request.form.get('content')
         new_filename = request.form.get('filename')
         if not new_filename.endswith('.md'):
             new_filename += '.md'
-        new_filepath = os.path.join(CONTENT_DIR, new_filename)
+        new_filepath = os.path.join(base_dir, new_filename)
 
         # 保存文件
         with open(new_filepath, 'w', encoding='utf-8') as f:
@@ -138,13 +174,15 @@ def edit():
 
     return render_template('edit.html', filename=filename, content=content)
 
-# 删除文章
-@app.route('/delete/<filename>')
-def delete(filename):
+# 删除主页文章
+@app.route('/delete/<scope>/<filename>')
+def delete(scope, filename):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
 
-    filepath = os.path.join(CONTENT_DIR, filename)
+    # scope = "main" 或 "blog"
+    base_dir = Content_dir if scope == 'main' else BlogContent_dir
+    filepath = os.path.join(base_dir, filename)
     if os.path.exists(filepath):
         os.remove(filepath)
     return redirect(url_for('admin'))
@@ -170,7 +208,7 @@ def carbon_silicon_matrix():
     return render_template('Carbon_Silicon_Matrix.html')
 
 if __name__ == '__main__':
-    if not os.path.exists(CONTENT_DIR):
-        os.makedirs(CONTENT_DIR)
+    if not os.path.exists(Content_dir):
+        os.makedirs(Content_dir)
     app.run(debug=True)
 

@@ -83,21 +83,21 @@
 
 <div class="container">
     <a href="/" class="button-link">返回</a>
-    <h2>文章管理</h2>
+    <h2>主页文章管理</h2>
     <p>
-        <a href="{{ url_for('edit') }}">新建文章</a> |
+        <a href="{{ url_for('edit', scope='main') }}">新建文章</a> |
         <a href="{{ url_for('logout') }}">退出登录</a>
     </p>
 
     <ul>
     {% for f in files %}
         <li>{{ f }}
-            [<a href="{{ url_for('edit', filename=f) }}">编辑</a>]
-            [<a href="{{ url_for('delete', filename=f) }}" onclick="return confirm('确定删除？');">删除</a>]
+            [<a href="{{ url_for('edit', scope='main', filename=f) }}">编辑</a>]
+            [<a href="{{ url_for('delete', scope='main', filename=f) }}" onclick="return confirm('确定删除？');">删除</a>]
         </li>
     {% endfor %}
     </ul>
-<h2>文章显示顺序管理</h2>
+<h2>主页文章显示顺序管理</h2>
 
     <ul id="file-list">
   {% for f in files %}
@@ -131,6 +131,59 @@
 </script>
 
 </div>
+
+
+<div class="container">
+    <a href="/" class="button-link">返回</a>
+    <h2>博客页面管理</h2>
+    <p>
+        <a href="{{ url_for('edit', scope='blog') }}">新建文章</a> |
+        <a href="{{ url_for('logout') }}">退出登录</a>
+    </p>
+
+    <ul>
+    {% for f2 in files_blog %}
+        <li>{{ f2 }}
+            [<a href="{{ url_for('edit', scope='blog', filename=f2) }}">编辑</a>]
+            [<a href="{{ url_for('delete', scope='blog',filename=f2) }}" onclick="return confirm('确定删除？');">删除</a>]
+        </li>
+    {% endfor %}
+    </ul>
+<h2>博客页面文章显示顺序管理</h2>
+
+    <ul id="file-list2">
+  {% for f2 in files_blog %}
+  <li data-name="{{ f2 }}">{{ f2 }}</li>
+  {% endfor %}
+</ul>
+
+<button id="save-order2">保存顺序</button>
+
+<!-- 引入 SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+  // 让 <ul id="file-list2"> 可拖动排序
+  const sortable2 = new Sortable(document.getElementById('file-list2'), {
+      animation: 150
+  });
+
+  document.getElementById('save-order2').addEventListener('click', () => {
+      // 获取当前顺序 —— 注意选择器改成 file-list2
+      const order2 = [...document.querySelectorAll('#file-list2 li')]
+                     .map(li => li.dataset.name);
+      // 发送到后端
+      fetch('{{ url_for("save_order2") }}', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({order: order2})
+      }).then(r => {
+          if (r.ok) alert('顺序已保存');
+      });
+  });
+</script>
+
+</div>
+
 
 <script>
 // 星空背景逻辑
