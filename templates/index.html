@@ -197,7 +197,7 @@
     transform: scale(1);
 }
 
-    .menu-item.slide-left:hover {
+.menu-item.slide-left:hover {
     z-index: 30;
     transform: translateX(0) scale(1.3);
 }
@@ -228,6 +228,17 @@
 
 .logo:hover {
     transform: scale(1.3);  /* 鼠标悬停时稍微放大 */
+}
+
+/* 浏览次数文字样式 */
+.view-count {
+    position: absolute;     /* 相对于 .logo-container 定位 */
+    top: 40px;              /* 调整上下位置 */
+    right: 15px;               /* 调整左右位置 */
+    font-size: 12px;        /* 字体大小 */
+    color: #00ffe7;         /* 字体颜色 */
+    font-weight: bold;      /* 加粗 */
+    text-shadow: 0 0 5px #00ffe7; /* 发光效果可选 */
 }
 
 #starfield {
@@ -361,6 +372,7 @@
     <header>
         <div class="logo-container">
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="My Logo" class="logo">
+                <p class="view-count">浏览次数:{{ view_count }}</p>
         </div>
     </header>
 
@@ -399,6 +411,7 @@
 </div>
 
 <script>
+    //菜单栏
 window.addEventListener('load', () => {
     const bar = document.querySelector('.menu-bar');
     setTimeout(() => {

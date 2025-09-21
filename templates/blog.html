@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <title>博客</title>
 <style>
+
     body {
-        margin: 0;
+        margin-top: 150px;
         padding: 0;
         background: radial-gradient(circle, #0f0f2f, #000000);
         color: #00ffe7;
@@ -13,8 +14,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        overflow: hidden;
+        min-height: 100vh;
     }
 
     #starfield {
@@ -33,7 +33,7 @@
         border-radius: 12px;
         box-shadow: 0 0 20px #00ffe7;
         text-align: center;
-        width: 300px;
+        width: 800px;
     }
 
     .blog-box h2 {
@@ -80,15 +80,107 @@
         display: block;     /* 每个按钮独占一行 */
         margin-top: 10px;   /* 每个按钮上方留空 */
     }
+    .article {
+        background: rgba(17, 17, 34, 0.5);
+        border-left: 5px solid #00ffe7;
+        margin: 20px 0;
+        padding: 20px;
+        text-align: left;
+        box-shadow: 0 0 10px #00ffe7;
+    }
 
+    .article h2 {
+        margin-top: 0;
+    }
+
+
+    /* 顶部固定的菜单栏容器 */
+    .menu-bar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    /* 呼吸光动画 */
+    @keyframes glow-breath {
+        0%, 100% {
+            text-shadow:
+              0 0 60px rgba(255, 255, 255, 0.4),
+              0 0 120px rgba(255, 255, 255, 1),
+              0 0 180px rgba(0, 255, 231, 0.8),
+              0 0 240px rgba(0, 255, 231, 0.3);
+        }
+        50% {
+            text-shadow:
+              0 0 5px rgba(255, 255, 255, 0.9),
+              0 0 10px rgba(255, 255, 255, 0.8),
+              0 0 20px rgba(0, 255, 231, 0.7),
+              0 0 25px rgba(0, 255, 231, 0.5);
+        }
+    }
+
+    /* 六边形按钮外观 */
+    .menu-title {
+        width: 150px;
+        height: 60px;
+        line-height: 60px;
+        background: #111122;
+        color: #00ffe7;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        white-space: nowrap;
+        user-select: none;
+        clip-path: polygon(
+            0% 0%, 100% 0%, 90% 50%, 100% 100%, 0% 100%, 10% 50%
+        );
+        font-size: 1.5em;
+        box-shadow: 0 0 10px #00ffe7;
+        transition: background 0.3s, transform 0.3s, color 0.1s;
+        animation: glow-breath 2.5s ease-in-out infinite;
+    }
+
+    /* 悬停时的高亮效果 */
+    .menu-title:hover {
+        background: #00ffe7;
+        color: #000;
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+    /* 初始进入时的缩放动画 */
+    .title-animate {
+        transform: scale(0);
+    }
+    .menu-bar.animate .title-animate {
+        transform: scale(1);
+        transition: transform 0.3s ease-out;
+    }
 
 </style>
 </head>
 <body>
 <canvas id="starfield"></canvas>
 
+<div class="menu-bar animate-on-load">
+    <a href="/blog" class="menu-title title-animate">当前:博客</a>
+    <a href="/" class="menu-title title-animate">返回</a>
+</div>
+
 <div class="blog-box">
-    <h2>开发中，敬请期待</h2>
+    <h2>博客页面</h2>
+    {% for article in articles %}
+    <div class="article">
+        <h2>{{ article.title }}</h2>
+        <div>{{ article.content|safe }}</div>
+    </div>
+    {% endfor %}
+
+
     <button type="button" onclick="window.location.href='{{ url_for('index') }}'">返回</button>
 </div>
 
@@ -150,5 +242,16 @@ function animateStars() {
 }
 animateStars();
 </script>
+
+<script>
+/* 进入页面时触发缩放动画 */
+window.addEventListener('load', () => {
+    const bar = document.querySelector('.menu-bar');
+    setTimeout(() => {
+        bar.classList.add('animate');
+    }, 300);
+});
+</script>
+
 </body>
 </html>

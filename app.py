@@ -17,9 +17,27 @@ BlogContent_dir = './BlogContent'
 # 文章排序顺序文件
 Content_Order = 'ContentOrder.json'
 BlogContent_Order = 'BlogContentOrder.json'
+
+# 计数文件路径
+Click_Nums_File = os.path.join('JsonData', 'ClickMainNums.json')
+
 # 前台主页
 @app.route('/')
 def index():
+    os.makedirs(os.path.dirname(Click_Nums_File), exist_ok=True)
+
+    count = 0
+    if os.path.exists(Click_Nums_File):
+        with open(Click_Nums_File, 'r', encoding='utf-8') as file:
+            try:
+                data = json.load(file)
+                count = data.get('count',0)
+            except json.JSONDecodeError:
+                count = 0
+    count += 1
+    with open(Click_Nums_File, 'w', encoding='utf-8') as file:
+        json.dump({'count': count}, file, ensure_ascii=False, indent = 1)
+
     # 读取自定义顺序
     custom_order = []
     if os.path.exists(Content_dir):
@@ -45,7 +63,7 @@ def index():
         order_index = {name: i for i, name in enumerate(custom_order)}
         articles.sort(key=lambda x: order_index.get(x['filename'], 9999))
 
-    return render_template('index.html', articles=articles)
+    return render_template('index.html', articles=articles, view_count = count)
     # 调用Flask的render_template模块渲染前端页面,使用index.html模板,传入articles
 
 # 登录
@@ -189,7 +207,33 @@ def delete(scope, filename):
 
 @app.route('/blog')
 def blog():
-    return render_template('blog.html')
+    # 读取自定义顺序
+    custom_order = []
+    if os.path.exists(BlogContent_dir):
+        with open(BlogContent_Order, 'r', encoding='utf-8') as f:
+            custom_order = json.load(f)
+
+    articles = [] # 存储读到的文章数据
+    for filename in os.listdir(BlogContent_dir):
+        if filename.endswith('.md'):
+            filepath = os.path.join(BlogContent_dir, filename)
+            with open(filepath, 'r', encoding='utf-8') as file:
+                md_text = file.read()
+            file_html_version = markdown.markdown(md_text, extensions=['fenced_code'])
+            # markdown库把md文本转换为html
+            articles.append({
+                'title': filename[:-3], # 文件名去掉.md当作文章名
+                'content': file_html_version,
+                'filename': filename
+            })
+
+    if custom_order:
+        # 按自定义顺序排序，没有列出的放最后
+        order_index = {name: i for i, name in enumerate(BlogContent_Order)}
+        articles.sort(key=lambda x: order_index.get(x['filename'], 9999))
+
+    return render_template('blog.html', articles=articles)
+    # 调用Flask的render_template模块渲染前端页面,使用blog.html模板,传入articles
 
 @app.route('/about')
 def about():
