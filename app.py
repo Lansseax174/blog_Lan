@@ -2,14 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for, session, a
 import markdown
 import os
 import json
-
+from Deepseek_blueprint.routes import deepseek_blueprint
 from dotenv import load_dotenv
 load_dotenv()
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # 这里填一个复杂点的随机字符串，保证 session 安全
-
+app.register_blueprint(deepseek_blueprint, url_prefix='/deepseek')
 # 主页文章存放目录
 Content_dir = './content'
 BlogContent_dir = './BlogContent'
@@ -235,9 +235,9 @@ def blog():
     return render_template('blog.html', articles=articles)
     # 调用Flask的render_template模块渲染前端页面,使用blog.html模板,传入articles
 
-@app.route('/about')
+@app.route('/deepseek')
 def about():
-    return render_template('about.html')
+    return render_template('deepseek.html')
 
 @app.route('/contact')
 def contact():

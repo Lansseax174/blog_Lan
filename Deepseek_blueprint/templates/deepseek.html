@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MarWorld_Oline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #e9ecef;
+    }
+    /* 主容器，左右分栏 */
+    .container {
+      display: flex;
+      flex-direction: row;
+      width: 90vw;
+      height: 90vh;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-top: 50px
+    }
+    /* 左侧聊天区域 */
+    .chat-panel {
+      flex: 1; /* 占剩余空间 */
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #ddd;
+    }
+    /* 顶部大头像样式：固定 1:1 大小的小框 */
+    .avatar {
+      width: 85px;
+      height: 60px;
+      object-fit: cover;
+      margin: 5px auto; /* 上下留些空隙，并居中 */
+    }
+    /* 在聊天区域上方显示当前 ID 的样式 */
+    .id-display {
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-bottom: 1px solid #ddd;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+    }
+    /* 右侧思考过程区域 */
+    .reasoning-panel {
+      width: 300px; /* 限制宽度 */
+      overflow-y: auto; /* 纵向滚动 */
+      border-left: 1px solid #ddd;
+      padding: 10px;
+      font-size: 14px;
+    }
+    .reasoning-panel p {
+      margin: 0;
+      padding: 4px 0;
+      line-height: 1.2;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    /* 聊天消息列表 */
+    .messages {
+      flex: 1;a
+      padding: 15px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .message.user p {
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 4px;
+      display: inline-block;
+      padding: 8px 12px;
+    }
+    .message.bot p {
+      background-color: #f1f3f5;
+      color: #333;
+      border-radius: 4px;
+      display: inline-block;
+      padding: 8px 12px;
+    }
+    /* 输入框区域 */
+    .input-container {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+    }
+    .input-container input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .input-container button {
+      padding: 8px 12px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .input-container button:hover {
+      background-color: #0056b3;
+    }
+    /* 加载状态 */
+    .loading {
+      text-align: center;
+      font-size: 16px;
+      color: #666;
+      padding: 5px 0;
+      display: none; /* 初始隐藏 */
+    }
+
+    /* ==================== 新增：区分用户头像和机器人头像的样式 ==================== */
+    .message-content-wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    /* 用户头像：例如 32x32 */
+    .avatar-user-message {
+      width: 45px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    /* 机器人/Context头像：例如 36x36 */
+    .avatar-bot-message {
+      width: 45px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+      #starfield {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle, #0f0f2f, #000000);
+  }
+
+    /* 上方的当前按钮和返回按钮 */
+    /* 顶部固定的菜单栏容器 */
+    .menu-bar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    /* 呼吸光动画 */
+    @keyframes glow-breath {
+        0%, 100% {
+            text-shadow:
+              0 0 60px rgba(255, 255, 255, 0.4),
+              0 0 120px rgba(255, 255, 255, 1),
+              0 0 180px rgba(0, 255, 231, 0.8),
+              0 0 240px rgba(0, 255, 231, 0.3);
+        }
+        50% {
+            text-shadow:
+              0 0 5px rgba(255, 255, 255, 0.9),
+              0 0 10px rgba(255, 255, 255, 0.8),
+              0 0 20px rgba(0, 255, 231, 0.7),
+              0 0 25px rgba(0, 255, 231, 0.5);
+        }
+    }
+
+    /* 六边形按钮外观 */
+    .menu-title {
+        width: 150px;
+        height: 60px;
+        line-height: 60px;
+        background: #111122;
+        color: #00ffe7;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        white-space: nowrap;
+        user-select: none;
+        clip-path: polygon(
+            0% 0%, 100% 0%, 90% 50%, 100% 100%, 0% 100%, 10% 50%
+        );
+        font-size: 1em;
+        box-shadow: 0 0 10px #00ffe7;
+        transition: background 0.3s, transform 0.3s, color 0.1s;
+        animation: glow-breath 2.5s ease-in-out infinite;
+    }
+
+    /* 悬停时的高亮效果 */
+    .menu-title:hover {
+        background: #00ffe7;
+        color: #000;
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+    /* 初始进入时的缩放动画 */
+    .title-animate {
+        transform: scale(0);
+    }
+    .menu-bar.animate .title-animate {
+        transform: scale(1);
+        transition: transform 0.3s ease-out;
+    }
+
+  </style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+  <!-- 将 user_id 注入到前端 -->
+  <script>
+    let userID = "{{ user_id }}";  // 从后端接收到的随机 ID
+    console.log("分配到的 userID=", userID);
+  </script>
+  <div class="menu-bar animate-on-load">
+    <a href="/deepseek" class="menu-title title-animate">当前:DeepSeek</a>
+    <a href="/" class="menu-title title-animate">返回</a>
+</div>
+  <div class="container">
+    <!-- 左侧聊天区域 -->
+    <div class="chat-panel">
+      <!-- 顶部大头像(原封不动) -->
+      <img src="{{ url_for('static', filename='images/deepseek.png') }}" alt="头像" class="avatar" />
+      <!-- 在这里显示当前ID -->
+      <div class="id-display" id="current-user-id"></div>
+
+      <!-- 消息列表 -->
+      <div class="messages" id="messages"></div>
+
+      <!-- 加载状态提示 -->
+      <div id="loading" class="loading">加载中...</div>
+
+      <!-- 输入框 -->
+      <div class="input-container">
+        <input id="chat-input" type="text" placeholder="输入消息..." />
+        <!-- 一次性模式 -->
+        <button onclick="sendMessage()">发送(一次性)</button>
+        <!-- 流式模式 -->
+        <button onclick="sendMessageStream()">发送(流式)</button>
+      </div>
+    </div>
+
+    <!-- 右侧思考过程区域 -->
+    <div class="reasoning-panel" id="reasoning-panel">
+      <p style="color: #fff;">思考过程会显示在这里...</p>
+    </div>
+  </div>
+
+  <script>
+    // 将 userID 显示到页面顶部
+    document.getElementById("current-user-id").textContent = "当前 ID: " + userID;
+
+    let reasoningContentSoFar = "";
+
+    function displayMessage(role, text) {
+      const messagesContainer = document.getElementById('messages');
+      const messageElement = document.createElement('div');
+      messageElement.className = `message ${role}`;
+
+      // ========== 决定小头像 + 小头像的样式 ========== 
+      let avatarPath = "";
+      let avatarClass = "";
+      if (role === 'user') {
+        // 用户头像
+        avatarPath = "{{ url_for('static', filename='/images/avatar.jpg') }}";
+        avatarClass = "avatar-user-message";
+      } else {
+        // 机器人 / Context 头像
+        avatarPath = "{{ url_for('static', filename='/images/avatar.jpg') }}";
+        avatarClass = "avatar-bot-message";
+      }
+
+      // 转义文本，防止HTML注入
+      const safeText = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      // 在这里插入头像 + 消息内容
+      messageElement.innerHTML = `
+        <div class="message-content-wrapper">
+          <img src="${avatarPath}" alt="avatar" class="${avatarClass}">
+          <p>${safeText}</p>
+        </div>
+      `;
+
+      messagesContainer.appendChild(messageElement);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function displayReasoning(text) {
+      reasoningContentSoFar += text;
+      const reasoningPanel = document.getElementById('reasoning-panel');
+      let existingParagraph = reasoningPanel.querySelector('p');
+      if (!existingParagraph) {
+        existingParagraph = document.createElement('p');
+        reasoningPanel.appendChild(existingParagraph);
+      }
+      const safeText = reasoningContentSoFar
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      existingParagraph.textContent = safeText;
+      reasoningPanel.scrollTop = reasoningPanel.scrollHeight;
+    }
+
+    // 一次性请求
+    function sendMessage() {
+      const inputElement = document.getElementById("chat-input");
+      const message = inputElement.value.trim();
+      if (!message) return;
+
+      // 显示用户消息
+      displayMessage('user', message);
+      inputElement.value = '';
+
+      document.getElementById('reasoning-panel').innerHTML = '';
+      reasoningContentSoFar = "";
+      const loadingEl = document.getElementById("loading");
+      loadingEl.style.display = "block";
+      loadingEl.textContent = "加载中...";
+
+      fetch(`/chat?user_id=${encodeURIComponent(userID)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
+      })
+      .then(response => response.json())
+      .then(data => {
+        loadingEl.style.display = "none";
+        displayMessage('bot', data.reply);
+      })
+      .catch(error => {
+        loadingEl.style.display = "none";
+        displayMessage('bot', '出错了，请稍后再试。');
+        console.error('Error:', error);
+      });
+    }
+
+    // 流式请求 (SSE)
+    function sendMessageStream() {
+      const inputElement = document.getElementById("chat-input");
+      const message = inputElement.value.trim();
+      if (!message) return;
+
+      displayMessage('user', message);
+      inputElement.value = '';
+      document.getElementById('reasoning-panel').innerHTML = '';
+      reasoningContentSoFar = "";
+      const loadingEl = document.getElementById("loading");
+      loadingEl.style.display = "block";
+      loadingEl.textContent = "加载中...";
+
+      const url = `/chat_stream?user_id=${encodeURIComponent(userID)}&message=${encodeURIComponent(message)}`;
+      const evtSource = new EventSource(url);
+
+      let answerSoFar = "";
+
+      evtSource.onmessage = function(event) {
+        const data = event.data || "";
+        if (data.startsWith("REASONING:")) {
+          const reasoningText = data.replace("REASONING:", "");
+          displayReasoning(reasoningText);
+        } else if (data.startsWith("ANSWER:")) {
+          const ansPart = data.replace("ANSWER:", "");
+          displayReasoning(ansPart);
+          answerSoFar += ansPart;
+        } else {
+          displayReasoning("\n" + data + "\n");
+        }
+      };
+
+      evtSource.addEventListener("end", function(event) {
+        evtSource.close();
+        displayMessage('bot', answerSoFar || "（无回答）");
+        loadingEl.style.display = "none";
+      });
+
+      evtSource.onerror = function(err) {
+        console.error("SSE 出错: ", err);
+        evtSource.close();
+        displayMessage('bot', '出错了，请稍后再试。');
+        loadingEl.style.display = "none";
+      };
+    }
+
+    // 按回车键时触发一次性请求
+    document.getElementById('chat-input').addEventListener('keypress', function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+
+<script>
+// 星空背景逻辑
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const numStars = 500;
+const stars = [];
+const maxZ = canvas.width;
+const speed = 0.5;
+
+for (let i = 0; i < numStars; i++) {
+    stars.push({
+        x: Math.random() * canvas.width - canvas.width / 2,
+        y: Math.random() * canvas.height - canvas.height / 2,
+        z: Math.random() * maxZ,
+        size: Math.random() * 2 + 1
+    });
+}
+
+function updateStars() {
+    for (let star of stars) {
+        star.z -= speed;
+        if (star.z <= 0) {
+            star.x = Math.random() * canvas.width - canvas.width / 2;
+            star.y = Math.random() * canvas.height - canvas.height / 2;
+            star.z = maxZ;
+            star.size = Math.random() * 2 + 1;
+        }
+    }
+}
+
+function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let star of stars) {
+        const sx = (star.x / star.z) * canvas.width + canvas.width / 2;
+        const sy = (star.y / star.z) * canvas.height + canvas.height / 2;
+        const radius = (1 - star.z / maxZ) * star.size * 2;
+        ctx.beginPath();
+        ctx.arc(sx, sy, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(0,255,255,${1 - star.z / maxZ})`;
+        ctx.fill();
+    }
+}
+
+function animateStars() {
+    updateStars();
+    drawStars();
+    requestAnimationFrame(animateStars);
+}
+animateStars();
+</script>
+<script>
+/* 进入页面时触发缩放动画 */
+window.addEventListener('load', () => {
+    const bar = document.querySelector('.menu-bar');
+    setTimeout(() => {
+        bar.classList.add('animate');
+    }, 300);
+});
+</script>
+</body>
+</html>
