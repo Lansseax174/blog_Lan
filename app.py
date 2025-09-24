@@ -155,7 +155,7 @@ def save_order2():
         json.dump(data['order'], f, ensure_ascii=False, indent=2)
     return '', 200
 
-# 编辑或新建主页文章
+# 编辑或新建主页/博客文章(两者复用一个edit函数)
 @app.route('/<scope>/edit', methods=['GET', 'POST'])
 def edit(scope):
     if not session.get('logged_in'):
@@ -192,7 +192,7 @@ def edit(scope):
 
     return render_template('edit.html', filename=filename, content=content)
 
-# 删除主页文章
+# 删除主页/博客文章(两者复用一个delete函数)
 @app.route('/delete/<scope>/<filename>')
 def delete(scope, filename):
     if not session.get('logged_in'):
@@ -213,7 +213,7 @@ def blog():
         with open(BlogContent_Order, 'r', encoding='utf-8') as f:
             custom_order = json.load(f)
 
-    articles = [] # 存储读到的文章数据
+    articles2 = [] # 存储读到的文章数据
     for filename in os.listdir(BlogContent_dir):
         if filename.endswith('.md'):
             filepath = os.path.join(BlogContent_dir, filename)
@@ -221,7 +221,7 @@ def blog():
                 md_text = file.read()
             file_html_version = markdown.markdown(md_text, extensions=['fenced_code'])
             # markdown库把md文本转换为html
-            articles.append({
+            articles2.append({
                 'title': filename[:-3], # 文件名去掉.md当作文章名
                 'content': file_html_version,
                 'filename': filename
@@ -229,10 +229,11 @@ def blog():
 
     if custom_order:
         # 按自定义顺序排序，没有列出的放最后
-        order_index = {name: i for i, name in enumerate(BlogContent_Order)}
-        articles.sort(key=lambda x: order_index.get(x['filename'], 9999))
+        order_index = {name: i for i, name in enumerate(custom_order)}
+        articles2.sort(key=lambda x: order_index.get(x['filename'], 9999))
 
-    return render_template('blog.html', articles=articles)
+
+    return render_template('blog.html', articles2=articles2)
     # 调用Flask的render_template模块渲染前端页面,使用blog.html模板,传入articles
 
 @app.route('/deepseek')
