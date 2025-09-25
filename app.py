@@ -5,7 +5,7 @@ import markdown
 
 from flask import Flask, render_template, request, redirect, url_for, session
 
-from Deepseek_blueprint.routes import deepseek_blueprint
+from Deepseek_blueprint import deepseek_blueprint
 
 from dotenv import load_dotenv
 load_dotenv()
