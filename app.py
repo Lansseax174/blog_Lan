@@ -2,11 +2,12 @@ import json
 import os
 
 import markdown
-from dotenv import load_dotenv
+
 from flask import Flask, render_template, request, redirect, url_for, session
 
 from Deepseek_blueprint.routes import deepseek_blueprint
 
+from dotenv import load_dotenv
 load_dotenv()
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 

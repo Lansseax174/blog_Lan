@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}">
 <meta charset="UTF-8">
 <title>博客</title>
 <style>
@@ -93,6 +94,26 @@
         margin-top: 0;
     }
 
+.toggle-btn {
+    margin: 10px 0 !important;
+    padding: 6px 12px !important;
+    background-color: #00ffe7 !important;
+    color: #000 !important;
+    border: none !important;
+    cursor: pointer;
+    width: 90px !important;
+    height: 30px !important;
+}
+
+.toggle-btn:hover {
+    background-color: #00cfc0;
+}
+
+.article-content {
+    display: none; /* 默认隐藏 */
+    margin-top: 10px;
+    line-height: 1.6;
+}
 
     /* 顶部固定的菜单栏容器 */
     .menu-bar {
@@ -176,13 +197,31 @@
     {% for article in articles2 %}
     <div class="article">
         <h2>{{ article.title }}</h2>
-        <div>{{ article.content|safe }}</div>
+                <!-- 折叠按钮 -->
+        <button class="toggle-btn" onclick="toggleContent('content-{{ loop.index }}')">展开</button>
+        <!-- 默认隐藏内容区域 -->
+        <div id="content-{{ loop.index }}" class="article-content">{{ article.content|safe }}</div>
+
     </div>
     {% endfor %}
 
 
-    <button type="button" onclick="window.location.href='{{ url_for('index') }}'">返回</button>
+<!--    <button type="button" onclick="window.location.href='{{ url_for('index') }}'">返回</button>-->
 </div>
+
+<script>
+function toggleContent(id) {
+    const content = document.getElementById(id);
+    const btn = content.previousElementSibling; // 就是按钮
+    if (content.style.display === "none" || content.style.display === "") {
+        content.style.display = "block";
+        btn.textContent = "收起";
+    } else {
+        content.style.display = "none";
+        btn.textContent = "展开";
+    }
+}
+</script>
 
 <script>
 // 星空Canvas逻辑
